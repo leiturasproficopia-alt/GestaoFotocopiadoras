@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.exe
+*.spec
+build/
+dist/
+*.db
+*.log
+data/
+logs/
+agent.py
+gen.py
+.delete
+domain_device.tmp
+.pytest_cache/
