@@ -148,53 +148,192 @@ PRINTER_OIDS = {
     "prtAlertDescription": "1.3.6.1.2.1.43.18.1.1.7.1",
 }
 
-VENDOR_COUNTER_OIDS = {
-    "Ricoh": {
-        "Total de Paginas": "1.3.6.1.4.1.367.3.2.1.2.19.1.0",
-        "Total de Paginas Impressao": "1.3.6.1.4.1.367.3.2.1.2.19.2.0",
-        "Total de Paginas Fax": "1.3.6.1.4.1.367.3.2.1.2.19.3.0",
-        "Total de Paginas Copiadas": "1.3.6.1.4.1.367.3.2.1.2.19.4.0",
-    },
+
+def _match_model(detected_model: str, profile_keys: list[str]) -> bool:
+    detected = detected_model.lower()
+    for key in profile_keys:
+        if key.lower() in detected:
+            return True
+    return False
+
+
+DEVICE_PROFILES = {
     "Konica Minolta": {
-        "Total de Paginas": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.1.0",
-        "Total de Paginas Duplex": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.3.0",
-        "Total de Scans": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.5.0",
-        "Total Copias Mono": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.1",
-        "Total Copias Color": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.1",
-        "Total Impressoes Mono": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.2",
-        "Total Impressoes Color": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.2",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.1.0",
+                "Total Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.2.0",
+                "Total Cor": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.3.0",
+                "Total Scans": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.5.0",
+                "Total Copias Mono": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.1",
+                "Total Copias Color": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.1",
+                "Total Impressoes Mono": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.2",
+                "Total Impressoes Color": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.2",
+            },
+        },
+        "models": {
+            ("c550i", "c224e", "c364e", "c454e", "c554e", "c284e", "c227i", "c287i", "c367i", "c457i", "c557i"): {
+                "counters": {
+                    "Total de Paginas": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.1.0",
+                    "Total Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.2.0",
+                    "Total Cor": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.3.0",
+                    "Total Scans": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.5.0",
+                    "Scans Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.6.0",
+                    "Scans Cor": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.7.0",
+                    "Copias Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.1",
+                    "Copias Cor Total": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.1",
+                    "Copias Cor Unica": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.3.1",
+                    "Copias 2 Cores": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.4.1",
+                    "Impressoes Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.2",
+                    "Impressoes Cor Total": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.2",
+                    "Impressoes Cor Unica": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.3.2",
+                    "Impressoes 2 Cores": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.4.2",
+                    "Scan Email/SMB": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.5.1",
+                    "Scan Fax": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.6.1",
+                    "Scan User Box": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.7.1",
+                },
+                "supplies": {
+                    "Toner Preto": "1.3.6.1.2.1.43.11.1.1.9.1.4",
+                    "Toner Ciano": "1.3.6.1.2.1.43.11.1.1.9.1.1",
+                    "Toner Magenta": "1.3.6.1.2.1.43.11.1.1.9.1.2",
+                    "Toner Amarelo": "1.3.6.1.2.1.43.11.1.1.9.1.3",
+                    "Drum Preto": "1.3.6.1.2.1.43.11.1.1.9.1.11",
+                    "Drum Ciano": "1.3.6.1.2.1.43.11.1.1.9.1.5",
+                    "Drum Magenta": "1.3.6.1.2.1.43.11.1.1.9.1.7",
+                    "Drum Amarelo": "1.3.6.1.2.1.43.11.1.1.9.1.9",
+                    "Developer Preto": "1.3.6.1.2.1.43.11.1.1.9.1.12",
+                    "Developer Ciano": "1.3.6.1.2.1.43.11.1.1.9.1.6",
+                    "Developer Magenta": "1.3.6.1.2.1.43.11.1.1.9.1.8",
+                    "Developer Amarelo": "1.3.6.1.2.1.43.11.1.1.9.1.10",
+                    "Transfer Belt": "1.3.6.1.2.1.43.11.1.1.9.1.15",
+                    "Fusor": "1.3.6.1.2.1.43.11.1.1.9.1.14",
+                    "Deposito Lixo": "1.3.6.1.2.1.43.11.1.1.9.1.13",
+                    "Transfer Roller": "1.3.6.1.2.1.43.11.1.1.9.1.16",
+                    "Toner Filter": "1.3.6.1.2.1.43.11.1.1.9.1.17",
+                },
+            },
+            ("c4050i", "c3350i", "c3850i", "c3010i", "c3610i"): {
+                "counters": {
+                    "Total de Paginas": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.1.0",
+                    "Total Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.2.0",
+                    "Total Cor": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.3.0",
+                    "Total Scans": "1.3.6.1.4.1.18334.1.1.1.5.7.2.1.5.0",
+                    "Copias Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.1",
+                    "Copias Cor Total": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.1",
+                    "Impressoes Preto": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.1.2",
+                    "Impressoes Cor Total": "1.3.6.1.4.1.18334.1.1.1.5.7.2.2.1.5.2.2",
+                },
+                "supplies": {
+                    "Toner Preto": "1.3.6.1.2.1.43.11.1.1.9.1.4",
+                    "Toner Ciano": "1.3.6.1.2.1.43.11.1.1.9.1.1",
+                    "Toner Magenta": "1.3.6.1.2.1.43.11.1.1.9.1.2",
+                    "Toner Amarelo": "1.3.6.1.2.1.43.11.1.1.9.1.3",
+                    "Drum Preto": "1.3.6.1.2.1.43.11.1.1.9.1.11",
+                    "Drum Ciano": "1.3.6.1.2.1.43.11.1.1.9.1.5",
+                    "Drum Magenta": "1.3.6.1.2.1.43.11.1.1.9.1.7",
+                    "Drum Amarelo": "1.3.6.1.2.1.43.11.1.1.9.1.9",
+                    "Developer Preto": "1.3.6.1.2.1.43.11.1.1.9.1.12",
+                    "Developer Ciano": "1.3.6.1.2.1.43.11.1.1.9.1.6",
+                    "Developer Magenta": "1.3.6.1.2.1.43.11.1.1.9.1.8",
+                    "Developer Amarelo": "1.3.6.1.2.1.43.11.1.1.9.1.10",
+                    "Transfer Belt": "1.3.6.1.2.1.43.11.1.1.9.1.15",
+                    "Fusor": "1.3.6.1.2.1.43.11.1.1.9.1.14",
+                },
+            },
+        },
+    },
+    "Ricoh": {
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.367.3.2.1.2.19.1.0",
+                "Total de Paginas Impressao": "1.3.6.1.4.1.367.3.2.1.2.19.2.0",
+                "Total de Paginas Fax": "1.3.6.1.4.1.367.3.2.1.2.19.3.0",
+                "Total de Paginas Copiadas": "1.3.6.1.4.1.367.3.2.1.2.19.4.0",
+            },
+        },
+        "models": {},
     },
     "Xerox": {
-        "Total de Paginas": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.0",
-        "Total Impressoes": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.16",
-        "Total Copias": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.15",
-        "Total Scans": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.18",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.0",
+                "Total Impressoes": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.16",
+                "Total Copias": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.15",
+                "Total Scans": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.18",
+            },
+        },
+        "models": {},
     },
     "Canon": {
-        "Total de Paginas": "1.3.6.1.4.1.1602.1.11.1.3.1.4.100",
-        "Total Impressoes": "1.3.6.1.4.1.1602.1.11.1.3.1.4.111",
-        "Total Copias": "1.3.6.1.4.1.1602.1.11.1.3.1.4.110",
-        "Total Scans": "1.3.6.1.4.1.1602.1.11.1.3.1.4.130",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.1602.1.11.1.3.1.4.100",
+                "Total Impressoes": "1.3.6.1.4.1.1602.1.11.1.3.1.4.111",
+                "Total Copias": "1.3.6.1.4.1.1602.1.11.1.3.1.4.110",
+                "Total Scans": "1.3.6.1.4.1.1602.1.11.1.3.1.4.130",
+            },
+        },
+        "models": {},
     },
     "HP": {
-        "Total de Paginas": "1.3.6.1.2.1.43.10.2.1.4.1.1",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.2.1.43.10.2.1.4.1.1",
+            },
+        },
+        "models": {},
     },
     "Kyocera": {
-        "Total de Paginas": "1.3.6.1.4.1.1347.42.5.2.1.4.1",
-        "Total Impressoes": "1.3.6.1.4.1.1347.42.5.2.1.4.1",
-        "Total Copias": "1.3.6.1.4.1.1347.42.5.2.1.4.2",
-        "Total Scans": "1.3.6.1.4.1.1347.42.5.2.1.4.3",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.1347.42.5.2.1.4.1",
+                "Total Impressoes": "1.3.6.1.4.1.1347.42.5.2.1.4.1",
+                "Total Copias": "1.3.6.1.4.1.1347.42.5.2.1.4.2",
+                "Total Scans": "1.3.6.1.4.1.1347.42.5.2.1.4.3",
+            },
+        },
+        "models": {},
     },
     "Brother": {
-        "Total de Paginas": "1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.1",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.1",
+            },
+        },
+        "models": {},
     },
     "Samsung": {
-        "Total de Paginas": "1.3.6.1.4.1.236.11.1.8.1.1.1",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.236.11.1.8.1.1.1",
+            },
+        },
+        "models": {},
     },
     "Lexmark": {
-        "Total de Paginas": "1.3.6.1.4.1.641.2.1.2.1.5.1",
+        "default": {
+            "counters": {
+                "Total de Paginas": "1.3.6.1.4.1.641.2.1.2.1.5.1",
+            },
+        },
+        "models": {},
     },
 }
+
+
+def _get_profile(manufacturer: str, model: str) -> dict:
+    vendor = DEVICE_PROFILES.get(manufacturer, DEVICE_PROFILES.get("default"))
+    if not vendor:
+        vendor = DEVICE_PROFILES.get("Ricoh")
+    model_profiles = vendor.get("models", {})
+    for model_keys, profile in model_profiles.items():
+        if _match_model(model, list(model_keys)):
+            default_counters = vendor.get("default", {}).get("counters", {})
+            default_supplies = vendor.get("default", {}).get("supplies", {})
+            merged_counters = {**default_counters, **profile.get("counters", {})}
+            merged_supplies = {**default_supplies, **profile.get("supplies", {})}
+            return {"counters": merged_counters, "supplies": merged_supplies}
+    return vendor.get("default", {"counters": {}, "supplies": {}})
 
 
 def py_value(value):
@@ -337,11 +476,14 @@ async def collect_device(device):
     counters = {}
 
     manufacturer = device.get("manufacturer", "")
-    vendor_oids = VENDOR_COUNTER_OIDS.get(manufacturer, {})
-    if vendor_oids:
-        oid_list = list(vendor_oids.values())
+    model = device.get("model", "")
+    profile = _get_profile(manufacturer, model)
+
+    counter_oids = profile.get("counters", {})
+    if counter_oids:
+        oid_list = list(counter_oids.values())
         oid_results = await client.get_many(oid_list)
-        name_by_oid = {v: k for k, v in vendor_oids.items()}
+        name_by_oid = {v: k for k, v in counter_oids.items()}
         for oid_val, name_key in name_by_oid.items():
             val = py_value(oid_results.get(oid_val))
             if val is not None:
@@ -360,18 +502,34 @@ async def collect_device(device):
     device["counters"] = counters
 
     supplies = []
-    desc_vals = await client.walk(PRINTER_OIDS["prtMarkerSuppliesDescription"])
-    max_vals = await client.walk(PRINTER_OIDS["prtMarkerSuppliesMaxCapacity"])
-    level_vals = await client.walk(PRINTER_OIDS["prtMarkerSuppliesLevel"])
-    desc_map = {str(k).split(".")[-1]: py_value(v) for k, v in desc_vals}
-    max_map = {str(k).split(".")[-1]: py_value(v) for k, v in max_vals}
-    level_map = {str(k).split(".")[-1]: py_value(v) for k, v in level_vals}
-    for idx in desc_map:
-        supplies.append({
-            "description": desc_map.get(idx, ""),
-            "max": max_map.get(idx),
-            "level": level_map.get(idx),
-        })
+    supply_oids = profile.get("supplies", {})
+    if supply_oids:
+        oid_list = list(supply_oids.values())
+        oid_results = await client.get_many(oid_list)
+        name_by_oid = {v: k for k, v in supply_oids.items()}
+        for oid_val, name_key in name_by_oid.items():
+            val = py_value(oid_results.get(oid_val))
+            if val is not None:
+                supplies.append({
+                    "description": name_key,
+                    "max": 100,
+                    "level": val,
+                })
+
+    if not supplies:
+        desc_vals = await client.walk(PRINTER_OIDS["prtMarkerSuppliesDescription"])
+        max_vals = await client.walk(PRINTER_OIDS["prtMarkerSuppliesMaxCapacity"])
+        level_vals = await client.walk(PRINTER_OIDS["prtMarkerSuppliesLevel"])
+        desc_map = {str(k).split(".")[-1]: py_value(v) for k, v in desc_vals}
+        max_map = {str(k).split(".")[-1]: py_value(v) for k, v in max_vals}
+        level_map = {str(k).split(".")[-1]: py_value(v) for k, v in level_vals}
+        for idx in desc_map:
+            supplies.append({
+                "description": desc_map.get(idx, ""),
+                "max": max_map.get(idx),
+                "level": level_map.get(idx),
+            })
+
     device["supplies"] = supplies
 
     alerts = []
