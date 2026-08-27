@@ -44,6 +44,17 @@
                             <option value="0" {% if not agent.active %}selected{% endif %}>Inativo</option>
                         </select>
                     </div>
+                    {% else %}
+                    <div class="mb-3">
+                        <label class="form-label">Agent ID (opcional)</label>
+                        <input type="text" class="form-control" name="custom_agent_id" placeholder="Deixe vazio para gerar automaticamente">
+                        <small class="text-muted">Se quiser sincronizar com servidor remoto, coloque o agent_id desse servidor.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API Token (opcional)</label>
+                        <input type="text" class="form-control" name="custom_api_token" placeholder="Deixe vazio para gerar automaticamente">
+                        <small class="text-muted">Se quiser sincronizar com servidor remoto, coloque o api_token desse servidor.</small>
+                    </div>
                     {% endif %}
                 </div>
             </div>

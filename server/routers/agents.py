@@ -58,6 +58,8 @@ async def agent_new_submit(
     request: Request,
     name: str = Form(...),
     customer_name: str = Form(""),
+    custom_agent_id: str = Form(""),
+    custom_api_token: str = Form(""),
     discovery_interval: int = Form(4),
     discovery_unit: str = Form("hours"),
     counters_interval: int = Form(4),
@@ -71,8 +73,8 @@ async def agent_new_submit(
     network_ip: list[str] = Form([]),
     network_hostname: list[str] = Form([]),
 ):
-    new_token = secrets.token_hex(32)
-    agent_uuid = uuid.uuid4().hex
+    new_token = custom_api_token.strip() if custom_api_token.strip() else secrets.token_hex(32)
+    agent_uuid = custom_agent_id.strip() if custom_agent_id.strip() else uuid.uuid4().hex
     with get_db() as conn:
         try:
             cursor = conn.execute(
