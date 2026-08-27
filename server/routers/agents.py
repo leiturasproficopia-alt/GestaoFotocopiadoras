@@ -256,7 +256,7 @@ async def agent_download_config(request: Request, agent_id: int):
 
 @router.get("/{agent_id}/exe")
 @require_role("admin")
-async def agent_download_exe(request: Request, agent_id: int):
+async def agent_download_exe(request: Request, agent_id: int, server_url: str | None = None):
     if sys.platform != "win32":
         raise HTTPException(
             status_code=400,
@@ -279,7 +279,10 @@ async def agent_download_exe(request: Request, agent_id: int):
         return interval * 3600
 
     network_list = [n["ip_address"] for n in networks] if networks else ["192.168.1.0/24"]
-    server_url = str(request.base_url).rstrip("/")
+    if server_url:
+        server_url = server_url.rstrip("/")
+    else:
+        server_url = str(request.base_url).rstrip("/")
 
     template_code = AGENT_TEMPLATE.read_text(encoding="utf-8")
 
@@ -416,9 +419,12 @@ SERVICE_AGENT_MAC = "com.fotocopiadora.agent"
 
 @router.get("/{agent_id}/install-linux")
 @require_role("admin")
-async def agent_download_linux(request: Request, agent_id: int):
+async def agent_download_linux(request: Request, agent_id: int, server_url: str | None = None):
     agent, networks = _get_agent_context(agent_id)
-    server_url = str(request.base_url).rstrip("/")
+    if server_url:
+        server_url = server_url.rstrip("/")
+    else:
+        server_url = str(request.base_url).rstrip("/")
     agent_code = _build_agent_code(agent, networks, server_url)
     agent_name = agent["name"].replace(" ", "_").lower()
 
@@ -524,9 +530,12 @@ echo "Remover:   sudo systemctl stop $SERVICE_NAME && sudo systemctl disable $SE
 
 @router.get("/{agent_id}/install-mac")
 @require_role("admin")
-async def agent_download_mac(request: Request, agent_id: int):
+async def agent_download_mac(request: Request, agent_id: int, server_url: str | None = None):
     agent, networks = _get_agent_context(agent_id)
-    server_url = str(request.base_url).rstrip("/")
+    if server_url:
+        server_url = server_url.rstrip("/")
+    else:
+        server_url = str(request.base_url).rstrip("/")
     agent_code = _build_agent_code(agent, networks, server_url)
     agent_name = agent["name"].replace(" ", "_").lower()
 

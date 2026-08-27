@@ -168,6 +168,11 @@
 
 {% if agent %}
 <hr>
+<div class="mb-3">
+    <label class="form-label">URL do Servidor (para agentes remotos)</label>
+    <input type="text" class="form-control" id="serverUrl" placeholder="https://gestaofotocopiadoras.onrender.com" value="">
+    <small class="text-muted">Deixe vazio para usar o servidor atual. Preencha com a URL do Render para agentes comunicarem com o servidor remoto.</small>
+</div>
 <div class="d-flex gap-2">
     <form method="POST" action="/agents/{{ agent.id }}/regenerate-token" class="d-inline">
         <button type="submit" class="btn btn-warning" onclick="return confirm('Tem certeza que deseja regenerar o token?')">
@@ -182,13 +187,13 @@
             <i class="bi bi-box-seam"></i> Gerar Agente
         </button>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/exe" onclick="return confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')">
+            <li><a class="dropdown-item" id="btnExe" href="/agents/{{ agent.id }}/exe" onclick="return confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')">
                 <i class="bi bi-windows"></i> Windows (.exe)
             </a></li>
-            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/install-linux">
+            <li><a class="dropdown-item" id="btnLinux" href="/agents/{{ agent.id }}/install-linux">
                 <i class="bi bi-terminal"></i> Linux (.sh)
             </a></li>
-            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/install-mac">
+            <li><a class="dropdown-item" id="btnMac" href="/agents/{{ agent.id }}/install-mac">
                 <i class="bi bi-apple"></i> macOS (.sh)
             </a></li>
         </ul>
@@ -221,5 +226,14 @@ function addNetworkRow() {
     `;
     tbody.appendChild(tr);
 }
+
+document.getElementById('serverUrl').addEventListener('input', function() {
+    const url = this.value.trim();
+    const baseUrl = '/agents/{{ agent.id }}';
+    const suffix = url ? '?server_url=' + encodeURIComponent(url) : '';
+    document.getElementById('btnExe').href = baseUrl + '/exe' + suffix;
+    document.getElementById('btnLinux').href = baseUrl + '/install-linux' + suffix;
+    document.getElementById('btnMac').href = baseUrl + '/install-mac' + suffix;
+});
 </script>
 {% endblock %}
