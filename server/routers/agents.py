@@ -124,6 +124,8 @@ async def agent_edit_submit(
     agent_id: int,
     name: str = Form(...),
     customer_name: str = Form(""),
+    agent_uuid: str = Form(""),
+    api_token: str = Form(""),
     active: int = Form(1),
     discovery_interval: int = Form(4),
     discovery_unit: str = Form("hours"),
@@ -140,7 +142,7 @@ async def agent_edit_submit(
 ):
     with get_db() as conn:
         conn.execute(
-            """UPDATE agents SET name=?, customer_name=?, active=?,
+            """UPDATE agents SET name=?, customer_name=?, agent_id=?, api_token=?, active=?,
                 discovery_interval=?, discovery_unit=?,
                 counters_interval=?, counters_unit=?,
                 supplies_interval=?, supplies_unit=?,
@@ -148,7 +150,7 @@ async def agent_edit_submit(
                 attributes_interval=?, attributes_unit=?,
                 updated_at=datetime('now')
             WHERE id=?""",
-            (name, customer_name, active,
+            (name, customer_name, agent_uuid, api_token, active,
              discovery_interval, discovery_unit,
              counters_interval, counters_unit,
              supplies_interval, supplies_unit,

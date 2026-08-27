@@ -24,16 +24,18 @@
                     {% if agent %}
                     <div class="mb-3">
                         <label class="form-label">Agent ID</label>
-                        <input type="text" class="form-control" value="{{ agent.agent_id }}" disabled>
+                        <input type="text" class="form-control" name="agent_uuid" value="{{ agent.agent_id }}">
+                        <small class="text-muted">UUID unico do agente. Deve ser igual ao do servidor remoto.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">API Token</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="tokenField" value="{{ agent.api_token }}" readonly>
+                            <input type="text" class="form-control" name="api_token" id="tokenField" value="{{ agent.api_token }}">
                             <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('tokenField').value)">
                                 <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
+                        <small class="text-muted">Token de autenticacao. Deve ser igual ao do servidor remoto.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Estado</label>
