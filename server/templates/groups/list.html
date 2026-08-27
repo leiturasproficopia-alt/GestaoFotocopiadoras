@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Grupos de Dispositivos - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-collection"></i> Grupos de Dispositivos</h4>
+    {% if user.role == 'admin' %}
+    <a href="/groups/new" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Grupo</a>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for g in groups %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>
+                    <span class="badge" style="background-color: {{ g.color }}">&nbsp;</span>
+                    <a href="/groups/{{ g.id }}">{{ g.name }}</a>
+                </h5>
+                <p class="text-muted mb-2">{{ g.description or 'Sem descricao' }}</p>
+                <p><span class="badge bg-secondary">{{ g.device_count }} dispositivos</span></p>
+                {% if user.role == 'admin' %}
+                <a href="/groups/{{ g.id }}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                <form method="POST" action="/groups/{{ g.id }}/delete" style="display:inline" onsubmit="return confirm('Eliminar grupo?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% if not groups %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center text-muted">
+                <p>Nenhum grupo criado. Crie um grupo para organizar os dispositivos.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

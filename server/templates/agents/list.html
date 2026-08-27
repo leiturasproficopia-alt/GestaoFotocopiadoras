@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Agentes - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-hdd-network"></i> Agentes</h4>
+    {% if user.role == 'admin' %}
+    <a href="/agents/new" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Agente</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Cliente</th>
+                        <th>Agent ID</th>
+                        <th>Dispositivos</th>
+                        <th>Online</th>
+                        <th>Ultimo Heartbeat</th>
+                        <th>Estado</th>
+                        {% if user.role == 'admin' %}
+                        <th></th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in agents %}
+                    <tr>
+                        <td>{{ a.name }}</td>
+                        <td>{{ a.customer_name or 'N/D' }}</td>
+                        <td><code>{{ a.agent_id[:16] }}...</code></td>
+                        <td>{{ a.device_count }}</td>
+                        <td>{{ a.online_count }}</td>
+                        <td>{{ a.last_heartbeat[:16] if a.last_heartbeat else 'Nunca' }}</td>
+                        <td>
+                            {% if a.active %}
+                                <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        {% if user.role == 'admin' %}
+                        <td class="text-end">
+                            <a href="/agents/{{ a.id }}/edit" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="/agents/{{ a.id }}/delete" class="d-inline" onsubmit="return confirm('Tem certeza que deseja apagar o agente {{ a.name }}?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    {% if not agents %}
+                    <tr><td colspan="8" class="text-center text-muted">Nenhum agente registado.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

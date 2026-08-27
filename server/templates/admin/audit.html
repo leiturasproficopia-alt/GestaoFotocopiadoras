@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Auditoria - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-shield-check"></i> Registo de Auditoria <small class="text-muted">({{ total }} total)</small></h4>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>Utilizador</th>
+                        <th>Acao</th>
+                        <th>Entidade</th>
+                        <th>ID</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in logs %}
+                    <tr>
+                        <td>{{ l.created_at[:16] }}</td>
+                        <td>{{ l.username }}</td>
+                        <td>
+                            <span class="badge bg-{% if 'delete' in l.action %}danger{% elif 'create' in l.action %}success{% elif 'login' in l.action %}info{% else %}warning{% endif %}">
+                                {{ l.action }}
+                            </span>
+                        </td>
+                        <td>{{ l.entity_type }}</td>
+                        <td>{{ l.entity_id or '-' }}</td>
+                        <td>{{ l.ip_address or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not logs %}
+                    <tr><td colspan="6" class="text-center text-muted">Nenhum registo de auditoria.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="/admin/audit?page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Relatorios - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-file-earmark-bar-graph"></i> Relatorios</h4>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-calendar-month"></i> Relatorio Mensal</div>
+            <div class="card-body">
+                <form method="GET" action="/reports/monthly">
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" name="customer">
+                            <option value="">Todos os clientes</option>
+                            {% for c in customers %}
+                            <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mes</label>
+                        <input type="month" class="form-control" name="month" value="">
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-eye"></i> Visualizar</button>
+                    <button type="submit" formaction="/reports/monthly/csv" class="btn btn-outline-success"><i class="bi bi-download"></i> Exportar CSV</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-info-circle"></i> Sobre os Relatorios</div>
+            <div class="card-body">
+                <p>Os relatorios mensais incluem:</p>
+                <ul>
+                    <li>Resumo de dispositivos por cliente/agente</li>
+                    <li>Total de impressoes por dispositivo</li>
+                    <li>Nivel atual dos consumiveis</li>
+                    <li>Numero de erros e erros criticos</li>
+                </ul>
+                <p class="mb-0"><small class="text-muted">O relatorio e gerado com os dados disponiveis na data de solicitacao.</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

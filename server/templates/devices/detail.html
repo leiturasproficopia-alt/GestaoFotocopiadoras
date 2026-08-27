@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}{{ device.ip }} - Detalhe Dispositivo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>
+        <i class="bi bi-printer"></i> {{ device.ip }}
+        {% if device.online %}
+            <span class="badge bg-success">Online</span>
+        {% else %}
+            <span class="badge bg-danger">Offline</span>
+        {% endif %}
+    </h4>
+    <a href="/devices/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<ul class="nav nav-tabs" id="deviceTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#info">Informacao</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#counters">Contadores</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#consumables">Consumiveis</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#errors">Erros</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#history">Historico Estado</a></li>
+</ul>
+
+<div class="tab-content p-3 border border-top-0 rounded-bottom">
+    <div class="tab-pane fade show active" id="info">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table">
+                    <tr><th>IP</th><td>{{ device.ip }}</td></tr>
+                    <tr><th>Marca</th><td>{{ device.manufacturer }}</td></tr>
+                    <tr><th>Modelo</th><td>{{ device.model or 'N/D' }}</td></tr>
+                    <tr><th>Serial</th><td>{{ device.serial_number or 'N/D' }}</td></tr>
+                    <tr><th>Hostname</th><td>{{ device.hostname or 'N/D' }}</td></tr>
+                    <tr><th>Localizacao</th><td>{{ device.sys_location or 'N/D' }}</td></tr>
+                    <tr><th>Contacto</th><td>{{ device.sys_contact or 'N/D' }}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <tr><th>Agente</th><td>{{ device.agent_name or 'N/D' }} ({{ device.customer_name or 'N/D' }})</td></tr>
+                    <tr><th>SNMP Version</th><td>{{ device.snmp_version }}</td></tr>
+                    <tr><th>sysObjectID</th><td style="word-break:break-all">{{ device.sys_object_id or 'N/D' }}</td></tr>
+                    <tr><th>Firmware</th><td>{{ device.firmware or 'N/D' }}</td></tr>
+                    <tr><th>Estado</th><td>{{ device.status }} ({{ device.severity }})</td></tr>
+                    <tr><th>Ultima Vez Visto</th><td>{{ device.last_seen or 'Nunca' }}</td></tr>
+                    <tr><th>Criado em</th><td>{{ device.created_at }}</td></tr>
+                    <tr><th>Atualizado em</th><td>{{ device.updated_at }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="counters">
+        {% if counter_history %}
+        <canvas id="counterChart" height="100"></canvas>
+        <hr>
+        {% endif %}
+        {% if counters %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr><th>Nome</th><th>Valor</th><th>Unidade</th><th>Fonte</th><th>Data</th></tr>
+                </thead>
+                <tbody>
+                    {% for c in counters %}
+                    <tr>
+                        <td>{{ c.counter_name }}</td>
+                        <td>{{ c.counter_value }}</td>
+                        <td>{{ c.unit }}</td>
+                        <td>{{ c.source }}</td>
+                        <td>{{ c.collected_at[:16] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">Sem dados de contadores.</p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane fade" id="consumables">
+        {% if consumables %}
+        <div class="row">
+            {% for cs in consumables %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6>{{ cs.description or 'Consumivel ' ~ cs.type_code }}</h6>
+                        <div class="progress mb-2" style="height: 25px;">
+                            <div class="progress-bar {% if cs.percent and cs.percent <= 10 %}bg-danger{% elif cs.percent and cs.percent <= 20 %}bg-warning{% else %}bg-success{% endif %}"
+                                 style="width: {{ cs.percent or 0 }}%">
+                                {{ cs.percent or 0 }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            {{ cs.level or 0 }} / {{ cs.max_capacity or 0 }}
+                            | Fonte: {{ cs.source }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">Sem dados de consumiveis.</p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane fade" id="errors">
+        {% if errors %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr><th>Data</th><th>Codigo</th><th>Descricao</th><th>Severidade</th><th>Fonte</th></tr>
+                </thead>
+                <tbody>
+                    {% for e in errors %}
+                    <tr>
+                        <td>{{ e.collected_at[:16] }}</td>
+                        <td>{{ e.code or 'N/D' }}</td>
+                        <td>{{ e.description or 'N/D' }}</td>
+                        <td><span class="badge bg-{% if e.severity == 'critical' %}danger{% elif e.severity == 'warning' %}warning{% else %}info{% endif %}">{{ e.severity }}</span></td>
+                        <td>{{ e.source }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">Sem erros registados.</p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane fade" id="history">
+        {% if status_history %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr><th>Data</th><th>Estado</th><th>Severidade</th><th>Fonte</th><th>Codigo</th><th>Descricao</th></tr>
+                </thead>
+                <tbody>
+                    {% for s in status_history %}
+                    <tr>
+                        <td>{{ s.collected_at[:16] }}</td>
+                        <td><span class="badge bg-{% if s.status == 'online' %}success{% elif s.status == 'offline' %}danger{% else %}secondary{% endif %}">{{ s.status }}</span></td>
+                        <td>{{ s.severity }}</td>
+                        <td>{{ s.source }}</td>
+                        <td>{{ s.code or 'N/D' }}</td>
+                        <td>{{ s.description or 'N/D' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">Sem historico de estado.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if counter_history %}
+<script>
+    const chartData = {{ chart_data_json | safe }};
+    const colors = ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#0dcaf0'];
+    const datasets = Object.keys(chartData).map((name, i) => ({
+        label: name,
+        data: chartData[name].values,
+        borderColor: colors[i % colors.length],
+        fill: false,
+        tension: 0.3
+    }));
+    const labels = chartData[Object.keys(chartData)[0]]?.labels || [];
+
+    if (datasets.length > 0) {
+        new Chart(document.getElementById('counterChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: labels.map(l => l.substring(0, 16)), datasets },
+            options: { responsive: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

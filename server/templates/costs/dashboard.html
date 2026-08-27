@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Custos - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-currency-euro"></i> Analise de Custos</h4>
+    <a href="/costs/csv" class="btn btn-outline-success"><i class="bi bi-download"></i> Exportar CSV</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-bg-success">
+            <div class="card-body">
+                <h6 class="card-title">Custo Total Mensal</h6>
+                <h2>{{ '%.2f'|format(total_cost_all) }} EUR</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-bg-info">
+            <div class="card-body">
+                <h6 class="card-title">Total Paginas Impressas</h6>
+                <h2>{{ '{:,}'.format(total_pages_all) }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Cliente</th>
+                        <th style="text-align:right">Dispositivos</th>
+                        <th style="text-align:right">Paginas</th>
+                        <th style="text-align:right">Custo/Copia</th>
+                        <th style="text-align:right">Custo Base</th>
+                        <th style="text-align:right">Excedente</th>
+                        <th style="text-align:right">Custo Copias</th>
+                        <th style="text-align:right">Custo Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cost_data %}
+                    <tr>
+                        <td><strong>{{ c.customer_name }}</strong></td>
+                        <td style="text-align:right">{{ c.device_count }}</td>
+                        <td style="text-align:right">{{ '{:,}'.format(c.total_pages) }}</td>
+                        <td style="text-align:right">{{ '%.4f'|format(c.cost_per_copy) }}</td>
+                        <td style="text-align:right">{{ '%.2f'|format(c.monthly_base) }}</td>
+                        <td style="text-align:right">{{ '{:,}'.format(c.overage_pages) }}</td>
+                        <td style="text-align:right">{{ '%.2f'|format(c.copy_cost) }}</td>
+                        <td style="text-align:right"><strong>{{ '%.2f'|format(c.total_cost) }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                    {% if not cost_data %}
+                    <tr><td colspan="8" class="text-center text-muted">Sem dados de custos.</td></tr>
+                    {% endif %}
+                </tbody>
+                {% if cost_data %}
+                <tfoot>
+                    <tr class="table-info">
+                        <td><strong>TOTAL</strong></td>
+                        <td></td>
+                        <td style="text-align:right"><strong>{{ '{:,}'.format(total_pages_all) }}</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align:right"><strong>{{ '%.2f'|format(total_cost_all) }} EUR</strong></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

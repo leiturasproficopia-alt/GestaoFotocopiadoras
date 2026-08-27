@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-speedometer2"></i> Dashboard</h4>
+    <span class="badge bg-success"><i class="bi bi-broadcast"></i> Ao vivo</span>
+</div>
+
+<div class="row mb-4" id="dashboard-cards"
+     hx-get="/api/dashboard/cards" hx-trigger="every 30s" hx-swap="innerHTML">
+    <div class="col-md-3">
+        <div class="card text-bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Total Dispositivos</h6>
+                        <h2>{{ total_devices }}</h2>
+                    </div>
+                    <i class="bi bi-printer display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Online</h6>
+                        <h2>{{ online_devices }}</h2>
+                    </div>
+                    <i class="bi bi-check-circle display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Offline</h6>
+                        <h2>{{ offline_devices }}</h2>
+                    </div>
+                    <i class="bi bi-x-circle display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Agentes Ativos</h6>
+                        <h2>{{ active_agents }} / {{ total_agents }}</h2>
+                        {% if active_alerts > 0 %}
+                        <span class="badge bg-danger">{{ active_alerts }} alertas</span>
+                        {% endif %}
+                    </div>
+                    <i class="bi bi-hdd-network display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-exclamation-triangle text-warning"></i> Consumiveis Baixos
+            </div>
+            <div class="card-body" id="low-supplies"
+                 hx-get="/api/dashboard/low-supplies" hx-trigger="every 60s" hx-swap="innerHTML">
+                {% if low_supplies %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Consumivel</th>
+                                <th>Nivel</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in low_supplies %}
+                            <tr>
+                                <td>{{ s.ip }}</td>
+                                <td>{{ s.manufacturer }}</td>
+                                <td>{{ s.model }}</td>
+                                <td>{{ s.description or 'N/D' }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar {% if s.percent <= 5 %}bg-danger{% elif s.percent <= 15 %}bg-warning{% else %}bg-info{% endif %}"
+                                             style="width: {{ s.percent }}%">
+                                            {{ s.percent }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-{% if s.percent <= 5 %}danger{% elif s.percent <= 15 %}warning{% else %}info{% endif %}">{{ s.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhum consumivel com nivel baixo.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-exclamation-triangle text-danger"></i> Erros Recentes
+            </div>
+            <div class="card-body" id="recent-errors"
+                 hx-get="/api/dashboard/recent-errors" hx-trigger="every 60s" hx-swap="innerHTML">
+                {% if recent_errors %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>IP</th>
+                                <th>Modelo</th>
+                                <th>Codigo</th>
+                                <th>Descricao</th>
+                                <th>Severidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in recent_errors %}
+                            <tr>
+                                <td>{{ e.collected_at[:16] }}</td>
+                                <td>{{ e.ip }}</td>
+                                <td>{{ e.model }}</td>
+                                <td>{{ e.code or 'N/D' }}</td>
+                                <td>{{ e.description or 'N/D' }}</td>
+                                <td><span class="badge bg-{% if e.severity == 'critical' %}danger{% elif e.severity == 'warning' %}warning{% else %}info{% endif %}">{{ e.severity }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhum erro registado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> Dispositivos por Marca
+            </div>
+            <div class="card-body">
+                {% if devices_by_manufacturer %}
+                <canvas id="manufacturerChart"></canvas>
+                {% else %}
+                <p class="text-muted mb-0">Sem dados.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Erros por Severidade
+            </div>
+            <div class="card-body">
+                {% if errors_by_severity %}
+                <canvas id="errorsChart"></canvas>
+                {% else %}
+                <p class="text-muted mb-0">Sem dados.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-graph-down"></i> Nivel Medio Consumiveis
+            </div>
+            <div class="card-body">
+                {% if avg_consumable_levels %}
+                <canvas id="consumablesChart"></canvas>
+                {% else %}
+                <p class="text-muted mb-0">Sem dados.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if devices_by_manufacturer %}
+<script>
+    const ctx = document.getElementById('manufacturerChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for m in devices_by_manufacturer %}'{{ m.manufacturer }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for m in devices_by_manufacturer %}{{ m.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#0dcaf0']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+</script>
+{% endif %}
+
+{% if errors_by_severity %}
+<script>
+    const ctxErrors = document.getElementById('errorsChart').getContext('2d');
+    new Chart(ctxErrors, {
+        type: 'bar',
+        data: {
+            labels: [{% for e in errors_by_severity %}'{{ e.severity }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Erros',
+                data: [{% for e in errors_by_severity %}{{ e.count }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [{% for e in errors_by_severity %}{% if e.severity == 'critical' %}'#dc3545'{% elif e.severity == 'warning' %}'#ffc107'{% else %}'#0dcaf0'{% endif %}{% if not loop.last %},{% endif %}{% endfor %}]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+</script>
+{% endif %}
+
+{% if avg_consumable_levels %}
+<script>
+    const ctxCons = document.getElementById('consumablesChart').getContext('2d');
+    new Chart(ctxCons, {
+        type: 'bar',
+        data: {
+            labels: [{% for c in avg_consumable_levels %}'{{ c.description[:20] }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: '% Medio',
+                data: [{% for c in avg_consumable_levels %}{{ c.avg_percent }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [{% for c in avg_consumable_levels %}{% if c.avg_percent <= 10 %}'#dc3545'{% elif c.avg_percent <= 25 %}'#ffc107'{% else %}'#198754'{% endif %}{% if not loop.last %},{% endif %}{% endfor %}]
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, max: 100 } }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

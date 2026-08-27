@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Perfil - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-person-circle"></i> Meu Perfil</h4>
+
+{% if error is defined and error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Dados Pessoais</div>
+            <div class="card-body">
+                <form method="POST" action="/profile/update">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" value="{{ full_user.username }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" value="{{ full_user.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ full_user.email or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <input type="text" class="form-control" value="{{ full_user.role }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Membro desde</label>
+                        <input type="text" class="form-control" value="{{ full_user.created_at[:10] }}" disabled>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Mudar Password</div>
+            <div class="card-body">
+                <form method="POST" action="/profile/change-password">
+                    <div class="mb-3">
+                        <label class="form-label">Password Atual</label>
+                        <input type="password" class="form-control" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova Password</label>
+                        <input type="password" class="form-control" name="new_password" required minlength="4">
+                    </div>
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Apos mudar a password, sera desconectado. Continuar?')">
+                        <i class="bi bi-key"></i> Mudar Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Preferencias</div>
+            <div class="card-body">
+                <form method="POST" action="/profile/preferences">
+                    <div class="mb-3">
+                        <label class="form-label">Tema</label>
+                        <select class="form-select" name="theme">
+                            <option value="light" {% if prefs and prefs.theme == 'light' %}selected{% endif %}>Claro</option>
+                            <option value="dark" {% if prefs and prefs.theme == 'dark' %}selected{% endif %}>Escuro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notificacoes</label>
+                        <select class="form-select" name="notifications">
+                            <option value="1" {% if prefs and prefs.notifications %}selected{% endif %}>Ativadas</option>
+                            <option value="0" {% if prefs and not prefs.notifications %}selected{% endif %}>Desativadas</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Refresh Dashboard (segundos)</label>
+                        <input type="number" class="form-control" name="dashboard_refresh" value="{{ prefs.dashboard_refresh if prefs else 30 }}" min="10" max="300">
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Sessoes Ativas</div>
+            <div class="card-body">
+                {% if sessions %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr><th>Data</th><th>IP</th><th>Expira</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for s in sessions %}
+                            <tr>
+                                <td>{{ s.created_at[:16] }}</td>
+                                <td>{{ s.ip_address or 'N/D' }}</td>
+                                <td>{{ s.expires_at[:16] if s.expires_at else 'N/D' }}</td>
+                                <td>
+                                    <form method="POST" action="/profile/sessions/{{ s.id }}/revoke" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Revogar">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhuma sessao registada.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

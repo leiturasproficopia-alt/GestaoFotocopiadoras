@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{% if rule %}Editar{% else %}Nova{% endif %} Regra - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">
+    <i class="bi bi-gear"></i> {% if rule %}Editar Regra{% else %}Nova Regra de Alerta{% endif %}
+</h4>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{% if rule %}/alerts/rules/{{ rule.id }}/edit{% else %}/alerts/rules/new{% endif %}">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" value="{{ rule.name if rule else '' }}" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" name="rule_type" required>
+                                {% for value, label in rule_types %}
+                                <option value="{{ value }}" {% if rule and rule.rule_type == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Limite</label>
+                            <input type="number" class="form-control" name="threshold" value="{{ rule.threshold if rule else 20 }}" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Severidade</label>
+                            <select class="form-select" name="severity">
+                                {% for s in severities %}
+                                <option value="{{ s }}" {% if rule and rule.severity == s %}selected{% endif %}>{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descricao</label>
+                        <textarea class="form-control" name="description" rows="2">{{ rule.description if rule else '' }}</textarea>
+                    </div>
+                    {% if rule %}
+                    <div class="mb-3">
+                        <label class="form-label">Ativa</label>
+                        <select class="form-select" name="active">
+                            <option value="1" {% if rule.active %}selected{% endif %}>Sim</option>
+                            <option value="0" {% if not rule.active %}selected{% endif %}>Nao</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+                    <a href="/alerts/rules" class="btn btn-outline-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Tipos de Regra</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li><strong>Consumivel Baixo</strong> - Alerta quando nivel <= limite</li>
+                    <li><strong>Erro Critico</strong> - Alerta para erros criticos nas ultimas horas</li>
+                    <li><strong>Dispositivo Offline</strong> - Alerta quando offline por mais de X horas</li>
+                    <li><strong>Limite de Contador</strong> - Alerta quando contador excede limite</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

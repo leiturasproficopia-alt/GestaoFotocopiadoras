@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Dispositivos - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-printer"></i> Dispositivos <small class="text-muted">({{ total }} total)</small></h4>
+    <a href="/export/devices?q={{ search }}&mfr={{ filter_manufacturer }}&status={{ filter_status }}&agent={{ filter_agent_id }}" class="btn btn-outline-success">
+        <i class="bi bi-download"></i> Exportar CSV
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="/devices/" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Pesquisar</label>
+                <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="IP, modelo, serial...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Marca</label>
+                <select class="form-select" name="mfr">
+                    <option value="">Todas</option>
+                    {% for m in manufacturers %}
+                    <option value="{{ m }}" {% if m == filter_manufacturer %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    <option value="online" {% if filter_status == 'online' %}selected{% endif %}>Online</option>
+                    <option value="offline" {% if filter_status == 'offline' %}selected{% endif %}>Offline</option>
+                    <option value="warning" {% if filter_status == 'warning' %}selected{% endif %}>Warning</option>
+                    <option value="unknown" {% if filter_status == 'unknown' %}selected{% endif %}>Desconhecido</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Agente</label>
+                <select class="form-select" name="agent">
+                    <option value="0">Todos</option>
+                    {% for a in agents %}
+                    <option value="{{ a.id }}" {% if a.id == filter_agent_id %}selected{% endif %}>{{ a.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Filtrar</button>
+            </div>
+            <div class="col-md-1">
+                <a href="/devices/" class="btn btn-outline-secondary w-100"><i class="bi bi-x-circle"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>IP</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Serial</th>
+                        <th>Hostname</th>
+                        <th>Agente</th>
+                        <th>Estado</th>
+                        <th>Ultima Vez</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in devices %}
+                    <tr>
+                        <td><code>{{ d.ip }}</code></td>
+                        <td>{{ d.manufacturer }}</td>
+                        <td>{{ d.model or 'N/D' }}</td>
+                        <td>{{ d.serial_number or 'N/D' }}</td>
+                        <td>{{ d.hostname or 'N/D' }}</td>
+                        <td>{{ d.agent_name or 'N/D' }}</td>
+                        <td>
+                            {% if d.online %}
+                                <span class="badge bg-success">Online</span>
+                            {% elif d.status == 'offline' %}
+                                <span class="badge bg-danger">Offline</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ d.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ d.last_seen[:16] if d.last_seen else 'Nunca' }}</td>
+                        <td>
+                            <a href="/devices/{{ d.id }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not devices %}
+                    <tr><td colspan="9" class="text-center text-muted">Nenhum dispositivo encontrado.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="/devices/?q={{ search }}&mfr={{ filter_manufacturer }}&status={{ filter_status }}&agent={{ filter_agent_id }}&page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

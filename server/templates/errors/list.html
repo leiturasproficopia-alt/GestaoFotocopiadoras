@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Erros - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-exclamation-triangle"></i> Erros e Alertas <small class="text-muted">({{ total }} total)</small></h4>
+    <a href="/export/errors?sev={{ filter_severity }}" class="btn btn-outline-success">
+        <i class="bi bi-download"></i> Exportar CSV
+    </a>
+</div>
+
+<div class="mb-3">
+    <a href="/errors/" class="btn btn-outline-secondary {% if not filter_severity %}active{% endif %}">Todos</a>
+    <a href="/errors/?sev=critical" class="btn btn-outline-danger {% if filter_severity == 'critical' %}active{% endif %}">Critico</a>
+    <a href="/errors/?sev=warning" class="btn btn-outline-warning {% if filter_severity == 'warning' %}active{% endif %}">Warning</a>
+    <a href="/errors/?sev=info" class="btn btn-outline-info {% if filter_severity == 'info' %}active{% endif %}">Info</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>IP</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Codigo</th>
+                        <th>Descricao</th>
+                        <th>Severidade</th>
+                        <th>Fonte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in errors %}
+                    <tr>
+                        <td>{{ e.collected_at[:16] }}</td>
+                        <td><code>{{ e.ip }}</code></td>
+                        <td>{{ e.manufacturer }}</td>
+                        <td>{{ e.model or 'N/D' }}</td>
+                        <td>{{ e.code or 'N/D' }}</td>
+                        <td>{{ e.description or 'N/D' }}</td>
+                        <td>
+                            <span class="badge bg-{% if e.severity == 'critical' %}danger{% elif e.severity == 'warning' %}warning{% else %}info{% endif %}">
+                                {{ e.severity }}
+                            </span>
+                        </td>
+                        <td>{{ e.source }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not errors %}
+                    <tr><td colspan="8" class="text-center text-muted">Nenhum erro encontrado.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="/errors/?sev={{ filter_severity }}&page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

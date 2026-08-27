@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Historico de Contadores - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-speedometer2"></i> Contadores</h4>
+
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" href="/counters/">Atual</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="/counters/history"><strong>Historico</strong></a>
+    </li>
+</ul>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label class="form-label">Dispositivo</label>
+                <select class="form-select" id="deviceFilter" onchange="filterDevice()">
+                    <option value="">Todos</option>
+                    {% for d in devices %}
+                    <option value="{{ d.id }}" {% if selected_device_id == d.id %}selected{% endif %}>
+                        {{ d.ip }} - {{ d.manufacturer }} {{ d.model or '' }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <a href="/counters/export{% if selected_device_id %}?device_id={{ selected_device_id }}{% endif %}" class="btn btn-success">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Exportar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-sm table-striped table-hover" id="historyTable">
+                <thead class="table-dark" style="position: sticky; top: 0;">
+                    <tr>
+                        <th>Data</th>
+                        <th>IP</th>
+                        <th>Fabricante</th>
+                        <th>Modelo</th>
+                        <th>Contador</th>
+                        <th class="text-end">Valor</th>
+                        <th>Unidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rows %}
+                    <tr data-device="{{ r.ip }}">
+                        <td>{{ r.collected_at[:16] if r.collected_at else 'N/D' }}</td>
+                        <td>{{ r.ip }}</td>
+                        <td>{{ r.manufacturer }}</td>
+                        <td>{{ r.model or 'N/D' }}</td>
+                        <td>{{ r.counter_name }}</td>
+                        <td class="text-end"><strong>{{ "{:,}".format(r.counter_value) if r.counter_value is not none else 'N/D' }}</strong></td>
+                        <td>{{ r.unit or 'paginas' }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not rows %}
+                    <tr><td colspan="7" class="text-center text-muted">Sem dados historicos.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterDevice() {
+    const val = document.getElementById('deviceFilter').value;
+    if (val) {
+        window.location.href = '/counters/history?device_id=' + val;
+    } else {
+        window.location.href = '/counters/history';
+    }
+}
+</script>
+{% endblock %}

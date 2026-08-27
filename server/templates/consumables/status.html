@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Consumiveis - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">
+    <i class="bi bi-droplet"></i> Consumiveis <small class="text-muted">({{ total }} total)</small>
+    {% if filter_alert == 'low' %}
+        <small class="text-danger">(Apenas niveis baixos)</small>
+    {% endif %}
+</h4>
+
+<div class="mb-3 d-flex justify-content-between">
+    <div>
+        <a href="/consumables/" class="btn btn-outline-secondary {% if not filter_alert %}active{% endif %}">Todos</a>
+        <a href="/consumables/?alert=low" class="btn btn-outline-danger {% if filter_alert == 'low' %}active{% endif %}">
+            <i class="bi bi-exclamation-triangle"></i> Niveis Baixos
+        </a>
+    </div>
+    <a href="/export/consumables?alert={{ filter_alert }}" class="btn btn-outline-success">
+        <i class="bi bi-download"></i> Exportar CSV
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>IP</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Hostname</th>
+                        <th>Consumivel</th>
+                        <th>Nivel</th>
+                        <th>Estado</th>
+                        <th>Ultima Leitura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in consumables %}
+                    <tr>
+                        <td><code>{{ c.ip }}</code></td>
+                        <td>{{ c.manufacturer }}</td>
+                        <td>{{ c.model or 'N/D' }}</td>
+                        <td>{{ c.hostname or 'N/D' }}</td>
+                        <td>{{ c.description or 'N/D' }}</td>
+                        <td style="min-width:150px">
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar {% if c.percent and c.percent <= 5 %}bg-danger{% elif c.percent and c.percent <= 15 %}bg-warning{% elif c.percent and c.percent <= 30 %}bg-info{% else %}bg-success{% endif %}"
+                                     style="width: {{ c.percent or 0 }}%">
+                                    {{ c.percent or 0 }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ c.level or 0 }} / {{ c.max_capacity or 0 }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if c.status == 'low' %}danger{% elif c.status == 'ok' %}success{% else %}secondary{% endif %}">
+                                {{ c.status }}
+                            </span>
+                        </td>
+                        <td>{{ c.collected_at[:16] }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not consumables %}
+                    <tr><td colspan="8" class="text-center text-muted">Nenhum consumivel encontrado.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="/consumables/?alert={{ filter_alert }}&page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

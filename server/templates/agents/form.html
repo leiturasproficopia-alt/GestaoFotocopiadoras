@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}{% if agent %}Editar Agente{% else %}Novo Agente{% endif %} - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">
+    <i class="bi bi-hdd-network"></i>
+    {% if agent %}Editar Agente: {{ agent.name }}{% else %}Novo Agente{% endif %}
+</h4>
+
+<form method="POST" action="{% if agent %}/agents/{{ agent.id }}/edit{% else %}/agents/new{% endif %}">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-info-circle"></i> Dados Gerais</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" value="{{ agent.name if agent else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <input type="text" class="form-control" name="customer_name" value="{{ agent.customer_name if agent else '' }}">
+                    </div>
+                    {% if agent %}
+                    <div class="mb-3">
+                        <label class="form-label">Agent ID</label>
+                        <input type="text" class="form-control" value="{{ agent.agent_id }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API Token</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="tokenField" value="{{ agent.api_token }}" readonly>
+                            <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('tokenField').value)">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" name="active">
+                            <option value="1" {% if agent.active %}selected{% endif %}>Ativo</option>
+                            <option value="0" {% if not agent.active %}selected{% endif %}>Inativo</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-clock-history"></i> Frequencia de Dados</div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-5">
+                            <label class="form-label">Descoberta</label>
+                            <input type="number" class="form-control" name="discovery_interval" value="{{ agent.discovery_interval if agent else 4 }}" min="1" required>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">&nbsp;</label>
+                            <select class="form-select" name="discovery_unit">
+                                <option value="minutes" {% if agent and agent.discovery_unit == 'minutes' %}selected{% endif %}>Minutos</option>
+                                <option value="hours" {% if not agent or (agent and agent.discovery_unit == 'hours') %}selected{% endif %}>Horas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-5">
+                            <label class="form-label">Medidores</label>
+                            <input type="number" class="form-control" name="counters_interval" value="{{ agent.counters_interval if agent else 4 }}" min="1" required>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">&nbsp;</label>
+                            <select class="form-select" name="counters_unit">
+                                <option value="minutes" {% if agent and agent.counters_unit == 'minutes' %}selected{% endif %}>Minutos</option>
+                                <option value="hours" {% if not agent or (agent and agent.counters_unit == 'hours') %}selected{% endif %}>Horas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-5">
+                            <label class="form-label">Suprimentos</label>
+                            <input type="number" class="form-control" name="supplies_interval" value="{{ agent.supplies_interval if agent else 1 }}" min="1" required>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">&nbsp;</label>
+                            <select class="form-select" name="supplies_unit">
+                                <option value="minutes" {% if agent and agent.supplies_unit == 'minutes' %}selected{% endif %}>Minutos</option>
+                                <option value="hours" {% if not agent or (agent and agent.supplies_unit == 'hours') %}selected{% endif %}>Horas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-5">
+                            <label class="form-label">Alertas e Cod. Erro</label>
+                            <input type="number" class="form-control" name="alerts_interval" value="{{ agent.alerts_interval if agent else 60 }}" min="1" required>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">&nbsp;</label>
+                            <select class="form-select" name="alerts_unit">
+                                <option value="minutes" {% if not agent or (agent and agent.alerts_unit == 'minutes') %}selected{% endif %}>Minutos</option>
+                                <option value="hours" {% if agent and agent.alerts_unit == 'hours' %}selected{% endif %}>Horas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-5">
+                            <label class="form-label">Atributos Dispositivo</label>
+                            <input type="number" class="form-control" name="attributes_interval" value="{{ agent.attributes_interval if agent else 12 }}" min="1" required>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">&nbsp;</label>
+                            <select class="form-select" name="attributes_unit">
+                                <option value="minutes" {% if agent and agent.attributes_unit == 'minutes' %}selected{% endif %}>Minutos</option>
+                                <option value="hours" {% if not agent or (agent and agent.attributes_unit == 'hours') %}selected{% endif %}>Horas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-diagram-3"></i> Rede</span>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addNetworkRow()">
+                <i class="bi bi-plus-circle"></i> Adicionar IP
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm" id="networkTable">
+                    <thead>
+                        <tr>
+                            <th style="width:40%">IP / Gama (IPv4)</th>
+                            <th style="width:40%">Nome do Host</th>
+                            <th style="width:20%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="networkBody">
+                        {% for n in networks %}
+                        <tr>
+                            <td><input type="text" class="form-control form-control-sm" name="network_ip" value="{{ n.ip_address }}" placeholder="192.168.1.100 ou 192.168.1.0/24" required></td>
+                            <td><input type="text" class="form-control form-control-sm" name="network_hostname" value="{{ n.hostname }}" placeholder="Nome do host (opcional)"></td>
+                            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                        {% endfor %}
+                        {% if not networks %}
+                        <tr>
+                            <td><input type="text" class="form-control form-control-sm" name="network_ip" placeholder="192.168.1.100 ou 192.168.1.0/24"></td>
+                            <td><input type="text" class="form-control form-control-sm" name="network_hostname" placeholder="Nome do host (opcional)"></td>
+                            <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <small class="text-muted">Indique IPs fixos (ex: 192.168.1.100) ou gamas CIDR (ex: 192.168.1.0/24).</small>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+        <a href="/agents/" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>
+
+{% if agent %}
+<hr>
+<div class="d-flex gap-2">
+    <form method="POST" action="/agents/{{ agent.id }}/regenerate-token" class="d-inline">
+        <button type="submit" class="btn btn-warning" onclick="return confirm('Tem certeza que deseja regenerar o token?')">
+            <i class="bi bi-shuffle"></i> Regenerar Token
+        </button>
+    </form>
+    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" download>
+        <i class="bi bi-download"></i> config.json
+    </a>
+    <div class="dropdown d-inline">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-box-seam"></i> Gerar Agente
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/exe" onclick="return confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')">
+                <i class="bi bi-windows"></i> Windows (.exe)
+            </a></li>
+            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/install-linux">
+                <i class="bi bi-terminal"></i> Linux (.sh)
+            </a></li>
+            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/install-mac">
+                <i class="bi bi-apple"></i> macOS (.sh)
+            </a></li>
+        </ul>
+    </div>
+    <form method="POST" action="/agents/{{ agent.id }}/delete" class="d-inline" onsubmit="return confirm('Tem certeza que deseja apagar o agente {{ agent.name }}? Todos os dispositivos associados serao mantidos.')">
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Apagar Agente
+        </button>
+    </form>
+</div>
+{% endif %}
+
+{% if show_token %}
+<hr>
+<div class="alert alert-success">
+    <strong>Token gerado:</strong>
+    <code>{{ agent.api_token }}</code>
+    <br><small>Guarde este token no agente. Nao sera mostrado novamente.</small>
+</div>
+{% endif %}
+
+<script>
+function addNetworkRow() {
+    const tbody = document.getElementById('networkBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" class="form-control form-control-sm" name="network_ip" placeholder="192.168.1.100 ou 192.168.1.0/24" required></td>
+        <td><input type="text" class="form-control form-control-sm" name="network_hostname" placeholder="Nome do host (opcional)"></td>
+        <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+}
+</script>
+{% endblock %}

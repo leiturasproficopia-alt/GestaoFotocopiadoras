@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Contadores - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-speedometer2"></i> Contadores</h4>
+
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link active" href="/counters/"><strong>Atual</strong></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/counters/history">Historico</a>
+    </li>
+</ul>
+
+{% for item in device_data %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <i class="bi bi-printer"></i>
+            <strong>{{ item.device.ip }}</strong>
+            {% if item.device.hostname %} - {{ item.device.hostname }}{% endif %}
+            <span class="text-muted ms-2">{{ item.device.manufacturer }} {{ item.device.model or '' }}</span>
+        </span>
+        <span class="text-muted">
+            Ultima Atualizacao: {{ item.last_update[:10] if item.last_update else 'N/D' }}
+        </span>
+    </div>
+    <div class="card-body">
+        {% if item.counters %}
+        <div class="row">
+            {% set counter_list = item.counters.keys()|list %}
+            {% set per_col = (counter_list|length / 3)|round(0, 'ceil')|int %}
+            {% for col in range(3) %}
+            <div class="col-md-4">
+                <table class="table table-sm table-borderless mb-0">
+                    {% for name in counter_list[col * per_col : (col + 1) * per_col] %}
+                    <tr>
+                        <td class="text-end {% if loop.first %}fw-bold{% endif %}">{{ name }}</td>
+                        <td class="text-end {% if loop.first %}fw-bold{% endif %}">{{ "{:,}".format(item.counters[name]) }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted text-center mb-0">Sem dados de contadores disponiveis.</p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+{% if not device_data %}
+<div class="card">
+    <div class="card-body text-center text-muted">
+        Nenhum dispositivo com dados de contadores.
+    </div>
+</div>
+{% endif %}
+{% endblock %}

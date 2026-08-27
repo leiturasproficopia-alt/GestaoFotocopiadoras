@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Alertas - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>
+        <i class="bi bi-bell"></i> Alertas
+        {% if active_count > 0 %}
+            <span class="badge bg-danger">{{ active_count }} ativos</span>
+        {% endif %}
+    </h4>
+    <div>
+        {% if active_count > 0 %}
+        <form method="POST" action="/alerts/acknowledge-all" style="display:inline">
+            <button type="submit" class="btn btn-outline-warning" onclick="return confirm('Reconhecer todos os alertas?')">
+                <i class="bi bi-check-all"></i> Reconhecer Todos
+            </button>
+        </form>
+        {% endif %}
+        {% if user.role in ['admin', 'technician'] %}
+        <a href="/alerts/rules" class="btn btn-outline-secondary"><i class="bi bi-gear"></i> Regras</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mb-3">
+    <a href="/alerts/" class="btn btn-outline-secondary {% if not filter_severity and not filter_ack %}active{% endif %}">Todos</a>
+    <a href="/alerts/?ack=no" class="btn btn-outline-danger {% if filter_ack == 'no' %}active{% endif %}">Por Reconhecer</a>
+    <a href="/alerts/?sev=critical" class="btn btn-outline-danger {% if filter_severity == 'critical' %}active{% endif %}">Critico</a>
+    <a href="/alerts/?sev=warning" class="btn btn-outline-warning {% if filter_severity == 'warning' %}active{% endif %}">Warning</a>
+    <a href="/alerts/?sev=info" class="btn btn-outline-info {% if filter_severity == 'info' %}active{% endif %}">Info</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>Regra</th>
+                        <th>IP</th>
+                        <th>Modelo</th>
+                        <th>Mensagem</th>
+                        <th>Severidade</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in alerts %}
+                    <tr class="{% if not a.acknowledged %}table-warning{% endif %}">
+                        <td>{{ a.triggered_at[:16] }}</td>
+                        <td>{{ a.rule_name }}</td>
+                        <td><code>{{ a.ip }}</code></td>
+                        <td>{{ a.model or 'N/D' }}</td>
+                        <td>{{ a.message }}</td>
+                        <td>
+                            <span class="badge bg-{% if a.severity == 'critical' %}danger{% elif a.severity == 'warning' %}warning{% else %}info{% endif %}">
+                                {{ a.severity }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if a.acknowledged %}
+                                <span class="badge bg-success">Reconhecido</span>
+                            {% else %}
+                                <span class="badge bg-danger">Ativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not a.acknowledged %}
+                            <form method="POST" action="/alerts/{{ a.id }}/acknowledge" style="display:inline">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Reconhecer">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not alerts %}
+                    <tr><td colspan="8" class="text-center text-muted">Nenhum alerta encontrado.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="/alerts/?sev={{ filter_severity }}&ack={{ filter_ack }}&page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

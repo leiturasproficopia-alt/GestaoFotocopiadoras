@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Utilizadores - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-people"></i> Utilizadores</h4>
+    <a href="/users/new" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Utilizador</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Username</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Estado</th>
+                        <th>Criado em</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td><strong>{{ u.username }}</strong></td>
+                        <td>{{ u.name }}</td>
+                        <td>{{ u.email or 'N/D' }}</td>
+                        <td><span class="badge bg-{% if u.role == 'admin' %}danger{% elif u.role == 'technician' %}warning{% else %}info{% endif %}">{{ u.role }}</span></td>
+                        <td>
+                            {% if u.active %}
+                                <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u.created_at[:10] }}</td>
+                        <td>
+                            <a href="/users/{{ u.id }}/edit" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if u.id != user.id %}
+                            <form method="POST" action="/users/{{ u.id }}/delete" class="d-inline" onsubmit="return confirm('Tem certeza?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

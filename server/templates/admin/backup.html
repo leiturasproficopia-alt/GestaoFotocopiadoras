@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Backup - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-database"></i> Backup e Restore</h4>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Criar Backup</div>
+            <div class="card-body">
+                <form method="POST" action="/admin/backup/create">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-download"></i> Criar Backup Agora</button>
+                </form>
+                <p class="text-muted mt-2 mb-0"><small>Copia completa da base de dados atual.</small></p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Restaurar Backup</div>
+            <div class="card-body">
+                <form method="POST" action="/admin/backup/restore">
+                    <div class="mb-3">
+                        <select class="form-select" name="filename" required>
+                            <option value="">Selecionar backup...</option>
+                            {% for b in backups %}
+                            <option value="{{ b.name }}">{{ b.name }} ({{ '%.1f'|format(b.size / 1024) }} KB)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Restaurar backup? A BD atual sera substituida!')">
+                        <i class="bi bi-upload"></i> Restaurar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Upload de Backup</div>
+            <div class="card-body">
+                <form method="POST" action="/admin/backup/upload" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <input type="file" class="form-control" name="file" accept=".db" required>
+                    </div>
+                    <button type="submit" class="btn btn-info"><i class="bi bi-cloud-upload"></i> Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Backups Disponiveis</div>
+            <div class="card-body">
+                {% if backups %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr><th>Nome</th><th>Tamanho</th><th>Data</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for b in backups %}
+                            <tr>
+                                <td>{{ b.name }}</td>
+                                <td>{{ '%.1f'|format(b.size / 1024) }} KB</td>
+                                <td>{{ b.created[:16] }}</td>
+                                <td>
+                                    <a href="/admin/backup/download/{{ b.name }}" class="btn btn-sm btn-outline-success" title="Download">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <form method="POST" action="/admin/backup/delete" style="display:inline" onsubmit="return confirm('Eliminar backup?')">
+                                        <input type="hidden" name="filename" value="{{ b.name }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhum backup disponivel.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Regras de Alerta - Gestao Fotocopiadoras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-gear"></i> Regras de Alerta</h4>
+    <a href="/alerts/rules/new" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nova Regra</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Limite</th>
+                        <th>Severidade</th>
+                        <th>Ativa</th>
+                        <th>Historico</th>
+                        <th>Ativos</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rules %}
+                    <tr>
+                        <td>{{ r.name }}</td>
+                        <td>{{ r.rule_type }}</td>
+                        <td>{{ r.threshold }}</td>
+                        <td>
+                            <span class="badge bg-{% if r.severity == 'critical' %}danger{% elif r.severity == 'warning' %}warning{% else %}info{% endif %}">
+                                {{ r.severity }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if r.active %}
+                                <span class="badge bg-success">Sim</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Nao</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.trigger_count }}</td>
+                        <td>
+                            {% if r.active_count > 0 %}
+                                <span class="badge bg-danger">{{ r.active_count }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/alerts/rules/{{ r.id }}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            <form method="POST" action="/alerts/rules/{{ r.id }}/delete" style="display:inline" onsubmit="return confirm('Eliminar regra?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not rules %}
+                    <tr><td colspan="8" class="text-center text-muted">Nenhuma regra configurada.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
