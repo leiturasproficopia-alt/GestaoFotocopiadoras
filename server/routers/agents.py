@@ -257,6 +257,12 @@ async def agent_download_config(request: Request, agent_id: int):
 @router.get("/{agent_id}/exe")
 @require_role("admin")
 async def agent_download_exe(request: Request, agent_id: int):
+    if sys.platform != "win32":
+        raise HTTPException(
+            status_code=400,
+            detail="Geracao de EXE so disponivel no Windows. Use Linux ou Mac installer.",
+        )
+
     with get_db() as conn:
         agent = conn.execute("SELECT * FROM agents WHERE id=?", (agent_id,)).fetchone()
         networks = conn.execute(
