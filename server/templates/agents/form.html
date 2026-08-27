@@ -192,7 +192,7 @@
             <i class="bi bi-shuffle"></i> Regenerar Token
         </button>
     </form>
-    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" download>
+    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" download id="btnConfig">
         <i class="bi bi-download"></i> config.json
     </a>
     <div class="dropdown d-inline">
@@ -247,6 +247,7 @@ document.getElementById('serverUrl').addEventListener('input', function() {
     document.getElementById('btnExe').href = baseUrl + '/exe' + suffix;
     document.getElementById('btnLinux').href = baseUrl + '/install-linux' + suffix;
     document.getElementById('btnMac').href = baseUrl + '/install-mac' + suffix;
+    document.getElementById('btnConfig').href = baseUrl + '/config' + suffix;
 });
 </script>
 {% endblock %}
