@@ -44,6 +44,11 @@
                             <option value="0" {% if not agent.active %}selected{% endif %}>Inativo</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-globe"></i> URL do Servidor</label>
+                        <input type="text" class="form-control" name="server_url" value="{{ agent.server_url if agent and agent.server_url else '' }}" placeholder="https://gestaofotocopiadoras.onrender.com">
+                        <small class="text-muted">URL do servidor para onde o agente envia dados. Deixe vazio para usar http://127.0.0.1:8000</small>
+                    </div>
                     {% else %}
                     <div class="mb-3">
                         <label class="form-label">Agent ID (opcional)</label>
@@ -61,17 +66,6 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card mb-4">
-                <div class="card-header"><i class="bi bi-globe"></i> URL do Servidor</div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">URL do Servidor (para agentes remotos)</label>
-                        <input type="text" class="form-control" name="server_url" value="{{ agent.server_url if agent and agent.server_url else '' }}" placeholder="http://127.0.0.1:8000">
-                        <small class="text-muted">URL do servidor para onde o agente envia dados. Deixe vazio para usar http://127.0.0.1:8000.</small>
-                    </div>
-                </div>
-            </div>
-
             <div class="card mb-4">
                 <div class="card-header"><i class="bi bi-clock-history"></i> Frequencia de Dados</div>
                 <div class="card-body">
