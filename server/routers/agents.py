@@ -198,7 +198,7 @@ async def agent_regenerate_token(request: Request, agent_id: int):
 
 @router.get("/{agent_id}/config")
 @require_role("admin")
-async def agent_download_config(request: Request, agent_id: int):
+async def agent_download_config(request: Request, agent_id: int, server_url: str = ""):
     with get_db() as conn:
         agent = conn.execute("SELECT * FROM agents WHERE id=?", (agent_id,)).fetchone()
         networks = conn.execute(
@@ -215,7 +215,9 @@ async def agent_download_config(request: Request, agent_id: int):
         return interval * 3600
 
     stored_url = agent["server_url"] if agent["server_url"] else ""
-    if stored_url:
+    if server_url:
+        api_base_url = server_url.rstrip("/")
+    elif stored_url:
         api_base_url = stored_url.rstrip("/")
     else:
         api_base_url = str(request.base_url).rstrip("/")

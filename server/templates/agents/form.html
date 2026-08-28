@@ -198,9 +198,12 @@
             <i class="bi bi-shuffle"></i> Regenerar Token
         </button>
     </form>
-    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" download>
-        <i class="bi bi-download"></i> config.json
-    </a>
+    <form method="GET" action="/agents/{{ agent.id }}/config" class="d-inline">
+        <input type="hidden" name="server_url" id="configServerUrl">
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-download"></i> config.json
+        </button>
+    </form>
     <div class="dropdown d-inline">
         <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
             <i class="bi bi-box-seam"></i> Gerar Agente
@@ -245,5 +248,14 @@ function addNetworkRow() {
     `;
     tbody.appendChild(tr);
 }
+
+document.querySelectorAll('form[action$="/config"]').forEach(function(form) {
+    form.addEventListener('submit', function() {
+        var urlField = document.querySelector('input[name="server_url"]');
+        if (urlField) {
+            document.getElementById('configServerUrl').value = urlField.value;
+        }
+    });
+});
 </script>
 {% endblock %}
