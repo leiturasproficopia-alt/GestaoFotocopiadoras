@@ -60,6 +60,7 @@ async def agent_new_submit(
     customer_name: str = Form(""),
     custom_agent_id: str = Form(""),
     custom_api_token: str = Form(""),
+    server_url: str = Form(""),
     discovery_interval: int = Form(4),
     discovery_unit: str = Form("hours"),
     counters_interval: int = Form(4),
@@ -78,14 +79,14 @@ async def agent_new_submit(
     with get_db() as conn:
         try:
             cursor = conn.execute(
-                """INSERT INTO agents (agent_id, name, customer_name, api_token,
+                """INSERT INTO agents (agent_id, name, customer_name, api_token, server_url,
                     discovery_interval, discovery_unit,
                     counters_interval, counters_unit,
                     supplies_interval, supplies_unit,
                     alerts_interval, alerts_unit,
                     attributes_interval, attributes_unit)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (agent_uuid, name, customer_name, new_token,
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (agent_uuid, name, customer_name, new_token, server_url,
                  discovery_interval, discovery_unit,
                  counters_interval, counters_unit,
                  supplies_interval, supplies_unit,
@@ -128,6 +129,7 @@ async def agent_edit_submit(
     customer_name: str = Form(""),
     agent_uuid: str = Form(""),
     api_token: str = Form(""),
+    server_url: str = Form(""),
     active: int = Form(1),
     discovery_interval: int = Form(4),
     discovery_unit: str = Form("hours"),
@@ -144,7 +146,7 @@ async def agent_edit_submit(
 ):
     with get_db() as conn:
         conn.execute(
-            """UPDATE agents SET name=?, customer_name=?, agent_id=?, api_token=?, active=?,
+            """UPDATE agents SET name=?, customer_name=?, agent_id=?, api_token=?, server_url=?, active=?,
                 discovery_interval=?, discovery_unit=?,
                 counters_interval=?, counters_unit=?,
                 supplies_interval=?, supplies_unit=?,
@@ -152,7 +154,7 @@ async def agent_edit_submit(
                 attributes_interval=?, attributes_unit=?,
                 updated_at=datetime('now')
             WHERE id=?""",
-            (name, customer_name, agent_uuid, api_token, active,
+            (name, customer_name, agent_uuid, api_token, server_url, active,
              discovery_interval, discovery_unit,
              counters_interval, counters_unit,
              supplies_interval, supplies_unit,
@@ -196,7 +198,7 @@ async def agent_regenerate_token(request: Request, agent_id: int):
 
 @router.get("/{agent_id}/config")
 @require_role("admin")
-async def agent_download_config(request: Request, agent_id: int, server_url: str | None = None):
+async def agent_download_config(request: Request, agent_id: int):
     with get_db() as conn:
         agent = conn.execute("SELECT * FROM agents WHERE id=?", (agent_id,)).fetchone()
         networks = conn.execute(
@@ -212,8 +214,9 @@ async def agent_download_config(request: Request, agent_id: int, server_url: str
             return interval * 60
         return interval * 3600
 
-    if server_url:
-        api_base_url = server_url.rstrip("/")
+    stored_url = agent["server_url"] if agent["server_url"] else ""
+    if stored_url:
+        api_base_url = stored_url.rstrip("/")
     else:
         api_base_url = str(request.base_url).rstrip("/")
 
@@ -265,7 +268,7 @@ async def agent_download_config(request: Request, agent_id: int, server_url: str
 
 @router.get("/{agent_id}/exe")
 @require_role("admin")
-async def agent_download_exe(request: Request, agent_id: int, server_url: str | None = None):
+async def agent_download_exe(request: Request, agent_id: int):
     if sys.platform != "win32":
         raise HTTPException(
             status_code=400,
@@ -288,8 +291,9 @@ async def agent_download_exe(request: Request, agent_id: int, server_url: str | 
         return interval * 3600
 
     network_list = [n["ip_address"] for n in networks] if networks else ["192.168.1.0/24"]
-    if server_url:
-        server_url = server_url.rstrip("/")
+    stored_url = agent["server_url"] if agent["server_url"] else ""
+    if stored_url:
+        server_url = stored_url.rstrip("/")
     else:
         server_url = str(request.base_url).rstrip("/")
 
@@ -428,10 +432,11 @@ SERVICE_AGENT_MAC = "com.fotocopiadora.agent"
 
 @router.get("/{agent_id}/install-linux")
 @require_role("admin")
-async def agent_download_linux(request: Request, agent_id: int, server_url: str | None = None):
+async def agent_download_linux(request: Request, agent_id: int):
     agent, networks = _get_agent_context(agent_id)
-    if server_url:
-        server_url = server_url.rstrip("/")
+    stored_url = agent["server_url"] if agent["server_url"] else ""
+    if stored_url:
+        server_url = stored_url.rstrip("/")
     else:
         server_url = str(request.base_url).rstrip("/")
     agent_code = _build_agent_code(agent, networks, server_url)
@@ -539,10 +544,11 @@ echo "Remover:   sudo systemctl stop $SERVICE_NAME && sudo systemctl disable $SE
 
 @router.get("/{agent_id}/install-mac")
 @require_role("admin")
-async def agent_download_mac(request: Request, agent_id: int, server_url: str | None = None):
+async def agent_download_mac(request: Request, agent_id: int):
     agent, networks = _get_agent_context(agent_id)
-    if server_url:
-        server_url = server_url.rstrip("/")
+    stored_url = agent["server_url"] if agent["server_url"] else ""
+    if stored_url:
+        server_url = stored_url.rstrip("/")
     else:
         server_url = str(request.base_url).rstrip("/")
     agent_code = _build_agent_code(agent, networks, server_url)

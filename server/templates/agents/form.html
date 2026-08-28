@@ -183,8 +183,8 @@
 <hr>
 <div class="mb-3">
     <label class="form-label">URL do Servidor (para agentes remotos)</label>
-    <input type="text" class="form-control" id="serverUrl" placeholder="https://gestaofotocopiadoras.onrender.com" value="">
-    <small class="text-muted">Deixe vazio para usar o servidor atual. Preencha com a URL do Render para agentes comunicarem com o servidor remoto.</small>
+    <input type="text" class="form-control" name="server_url" value="{{ agent.server_url if agent.server_url else '' }}" placeholder="https://gestaofotocopiadoras.onrender.com">
+    <small class="text-muted">URL do servidor para onde o agente envia dados. Deixe vazio para usar o servidor atual.</small>
 </div>
 <div class="d-flex gap-2">
     <form method="POST" action="/agents/{{ agent.id }}/regenerate-token" class="d-inline">
@@ -192,7 +192,7 @@
             <i class="bi bi-shuffle"></i> Regenerar Token
         </button>
     </form>
-    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" id="btnConfig" onclick="return downloadConfig(this)">
+    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" download>
         <i class="bi bi-download"></i> config.json
     </a>
     <div class="dropdown d-inline">
@@ -200,13 +200,13 @@
             <i class="bi bi-box-seam"></i> Gerar Agente
         </button>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" id="btnExe" href="/agents/{{ agent.id }}/exe" onclick="return downloadAgent(this, 'exe')">
+            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/exe" onclick="return confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')">
                 <i class="bi bi-windows"></i> Windows (.exe)
             </a></li>
-            <li><a class="dropdown-item" id="btnLinux" href="/agents/{{ agent.id }}/install-linux" onclick="return downloadAgent(this, 'linux')">
+            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/install-linux">
                 <i class="bi bi-terminal"></i> Linux (.sh)
             </a></li>
-            <li><a class="dropdown-item" id="btnMac" href="/agents/{{ agent.id }}/install-mac" onclick="return downloadAgent(this, 'mac')">
+            <li><a class="dropdown-item" href="/agents/{{ agent.id }}/install-mac">
                 <i class="bi bi-apple"></i> macOS (.sh)
             </a></li>
         </ul>
@@ -238,24 +238,6 @@ function addNetworkRow() {
         <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
     `;
     tbody.appendChild(tr);
-}
-
-function getServerSuffix() {
-    var url = document.getElementById('serverUrl').value.trim();
-    return url ? '?server_url=' + encodeURIComponent(url) : '';
-}
-
-function downloadConfig(el) {
-    var base = el.getAttribute('href').split('?')[0];
-    window.location.href = base + getServerSuffix();
-    return false;
-}
-
-function downloadAgent(el, type) {
-    if (type === 'exe' && !confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')) return false;
-    var base = el.getAttribute('href').split('?')[0];
-    window.location.href = base + getServerSuffix();
-    return false;
 }
 </script>
 {% endblock %}
