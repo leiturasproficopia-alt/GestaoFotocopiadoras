@@ -192,7 +192,7 @@
             <i class="bi bi-shuffle"></i> Regenerar Token
         </button>
     </form>
-    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" download id="btnConfig" onclick="applyServerUrl(this)">
+    <a href="/agents/{{ agent.id }}/config" class="btn btn-success" id="btnConfig" onclick="return downloadConfig(this)">
         <i class="bi bi-download"></i> config.json
     </a>
     <div class="dropdown d-inline">
@@ -200,13 +200,13 @@
             <i class="bi bi-box-seam"></i> Gerar Agente
         </button>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" id="btnExe" href="/agents/{{ agent.id }}/exe" onclick="applyServerUrl(this); return confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')">
+            <li><a class="dropdown-item" id="btnExe" href="/agents/{{ agent.id }}/exe" onclick="return downloadAgent(this, 'exe')">
                 <i class="bi bi-windows"></i> Windows (.exe)
             </a></li>
-            <li><a class="dropdown-item" id="btnLinux" href="/agents/{{ agent.id }}/install-linux" onclick="applyServerUrl(this)">
+            <li><a class="dropdown-item" id="btnLinux" href="/agents/{{ agent.id }}/install-linux" onclick="return downloadAgent(this, 'linux')">
                 <i class="bi bi-terminal"></i> Linux (.sh)
             </a></li>
-            <li><a class="dropdown-item" id="btnMac" href="/agents/{{ agent.id }}/install-mac" onclick="applyServerUrl(this)">
+            <li><a class="dropdown-item" id="btnMac" href="/agents/{{ agent.id }}/install-mac" onclick="return downloadAgent(this, 'mac')">
                 <i class="bi bi-apple"></i> macOS (.sh)
             </a></li>
         </ul>
@@ -240,13 +240,22 @@ function addNetworkRow() {
     tbody.appendChild(tr);
 }
 
-function applyServerUrl(el) {
+function getServerSuffix() {
     var url = document.getElementById('serverUrl').value.trim();
-    if (!url) return true;
-    var href = el.getAttribute('href');
-    var base = href.split('?')[0];
-    el.href = base + '?server_url=' + encodeURIComponent(url);
-    return true;
+    return url ? '?server_url=' + encodeURIComponent(url) : '';
+}
+
+function downloadConfig(el) {
+    var base = el.getAttribute('href').split('?')[0];
+    window.location.href = base + getServerSuffix();
+    return false;
+}
+
+function downloadAgent(el, type) {
+    if (type === 'exe' && !confirm('Gerar EXE Windows? Isto pode demorar alguns segundos.')) return false;
+    var base = el.getAttribute('href').split('?')[0];
+    window.location.href = base + getServerSuffix();
+    return false;
 }
 </script>
 {% endblock %}
